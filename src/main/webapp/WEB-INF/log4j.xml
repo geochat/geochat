@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="true">
+
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p [%d{dd MMM yyyy HH:mm:ss}] %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<category name="org.springframework">
+		<priority value="WARN" />
+		<appender-ref ref="stdout" />
+	</category>
+
+	<category name="net.sf.ehcache">
+		<priority value="WARN" />
+		<appender-ref ref="stdout" />
+	</category>
+
+	<category name="org.springframework.aop.framework.Cglib2AopProxy">
+		<priority value="ERROR" />
+		<appender-ref ref="stdout" />
+	</category>
+
+	<root>
+		<priority value="INFO" />
+		<appender-ref ref="stdout" />
+	</root>
+</log4j:configuration>

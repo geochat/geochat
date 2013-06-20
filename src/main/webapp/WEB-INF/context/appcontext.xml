@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>WEB-INF/context/environment.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://${db.host}:3306/${db.name}" />
+		<property name="username" value="${db.user}" />
+		<property name="password" value="${db.password}" />
+	</bean>
+
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- enable the configuration of transactional behavior based on annotations -->
+  <tx:annotation-driven transaction-manager="txManager"/>
+	<bean id="followersManagerBean" class="ru.geochat.model.dao.FollowersManager" autowire="byName">
+		<property name="importFollowers">
+			<value>
+			<![CDATA[
+			 select follower_user from followers where follower_me=?
+			]]>
+			</value>
+		</property>
+	</bean>	
+	<bean id="messagesManagerBean" class="ru.geochat.model.dao.MessagesManager" autowire="byName">
+		<property name="exportMessage">
+			<value>
+			<![CDATA[
+				insert into messages set message_to = ? , message_msg_text_id = ?
+			]]>
+			</value>
+		</property>
+		<property name="importMessage">
+			<value>
+			<![CDATA[
+				SELECT msg_from, msg_text FROM msg_text JOIN messages ON message_msg_text_id = msg_text_id WHERE message_to = ? ORDER BY message_id DESC LIMIT 10
+			]]>
+			</value>
+		</property>
+	</bean>	
+	<bean id="messageTextManagerBean" class="ru.geochat.model.dao.MessageTextManager" autowire="byName">
+		<property name="exportMsgText">
+			<value>
+			<![CDATA[
+			 insert into msg_text set msg_from = ? , msg_text = ?
+			]]>
+			</value>
+		</property>
+		<property name="getLastMsgTextId">
+			<value>
+			<![CDATA[
+			 select msg_text_id from msg_text order by msg_text_id DESC LIMIT 1
+			]]>
+			</value>
+		</property>
+	</bean>	
+	
+	
+	<bean id="UserManager" class="ru.geochat.model.dao.UserManager" autowire="byName">
+		<property name="searchByLogin">
+			<value>
+			<![CDATA[
+			 select user_id from users where user_login=?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importIsOnline">
+			<value>
+			<![CDATA[
+			 select user_is_online from users where user_id=?
+			]]>
+			</value>
+		</property>
+		
+		<property name="exportIsOnline">
+			<value>
+			<![CDATA[
+			 update users set user_is_online = ? where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importLastRefresh">
+			<value>
+			<![CDATA[
+			 select user_last_refresh from users where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="exportLastRefresh">
+			<value>
+			<![CDATA[
+			 update users set user_last_refresh = ? where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importCanRedirect">
+			<value>
+			<![CDATA[
+			 select user_can_redirect from users where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="exportCanRedirect">
+			<value>
+			<![CDATA[
+			 update users set user_can_redirect = ? where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="registerUser">
+			<value>
+			<![CDATA[
+			 insert into users set user_login = ? , user_password = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="loginUser">
+			<value>
+			<![CDATA[
+			 select user_id from users where user_login = ? and user_password = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="exportGeo">
+			<value>
+			<![CDATA[
+			 update users set user_geo_lat = ? , user_geo_lngt = ? where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importGeo">
+			<value>
+			<![CDATA[
+			 select user_geo_lat, user_geo_lngt from users where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importLogin">
+			<value>
+			<![CDATA[
+			 select user_login from users where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="importRadius">
+			<value>
+			<![CDATA[
+			 select user_radius from users where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+		<property name="exportRadius">
+			<value>
+			<![CDATA[
+			 update users set user_radius = ? where user_id = ?
+			]]>
+			</value>
+		</property>
+		
+	</bean>
+  	<bean id="serverControllerBean" class="ru.geochat.ServerController" autowire="byName">
+
+		<property name="followersManager">
+      		<ref bean="followersManagerBean"/>
+   		 </property>
+   		 <property name="messagesManager">
+      		<ref bean="messagesManagerBean"/>
+   		</property>
+   		  <property name="messageTextManager">
+      		<ref bean="messageTextManagerBean"/>
+   		 </property>
+
+   		 <property name="userManager">
+      		<ref bean="UserManager"/>
+   		 </property>
+	</bean>
+</beans>

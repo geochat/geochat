@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+
+div.map_container {
+	width: 500px; 
+	height: 500px; 
+	border: 1px solid gray; 
+	float: left;
+	padding: 10px;
+	margin-right: 10px; 
+}
+
+div.message_container {
+	width: 600px; float: left;
+}
